@@ -1,0 +1,15 @@
+<Window x:Class="DesktopF.ShowWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="DesktopF"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        ShowInTaskbar="False"
+        Topmost="True">
+    <Canvas x:Name="Overlay" Background="Transparent">
+        <Polygon x:Name="Pointer"
+                 Points="0,0 32,0 16,24"
+                 Fill="Red" />
+    </Canvas>
+</Window>

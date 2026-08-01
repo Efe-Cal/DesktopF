@@ -1,0 +1,14 @@
+C:\Users\efeca\Desktop\Programming\DesktopF\bin\Debug\net8.0\DesktopF.exe
+C:\Users\efeca\Desktop\Programming\DesktopF\bin\Debug\net8.0\DesktopF.deps.json
+C:\Users\efeca\Desktop\Programming\DesktopF\bin\Debug\net8.0\DesktopF.runtimeconfig.json
+C:\Users\efeca\Desktop\Programming\DesktopF\bin\Debug\net8.0\DesktopF.dll
+C:\Users\efeca\Desktop\Programming\DesktopF\bin\Debug\net8.0\DesktopF.pdb
+C:\Users\efeca\Desktop\Programming\DesktopF\obj\Debug\net8.0\DesktopF.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\efeca\Desktop\Programming\DesktopF\obj\Debug\net8.0\DesktopF.AssemblyInfoInputs.cache
+C:\Users\efeca\Desktop\Programming\DesktopF\obj\Debug\net8.0\DesktopF.AssemblyInfo.cs
+C:\Users\efeca\Desktop\Programming\DesktopF\obj\Debug\net8.0\DesktopF.csproj.CoreCompileInputs.cache
+C:\Users\efeca\Desktop\Programming\DesktopF\obj\Debug\net8.0\DesktopF.dll
+C:\Users\efeca\Desktop\Programming\DesktopF\obj\Debug\net8.0\refint\DesktopF.dll
+C:\Users\efeca\Desktop\Programming\DesktopF\obj\Debug\net8.0\DesktopF.pdb
+C:\Users\efeca\Desktop\Programming\DesktopF\obj\Debug\net8.0\DesktopF.genruntimeconfig.cache
+C:\Users\efeca\Desktop\Programming\DesktopF\obj\Debug\net8.0\ref\DesktopF.dll
