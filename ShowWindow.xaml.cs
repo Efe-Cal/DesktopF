@@ -18,16 +18,30 @@ public partial class ShowWindow : Window
         Width = SystemParameters.VirtualScreenWidth;
         Height = SystemParameters.VirtualScreenHeight;
 
-        Loaded += PointAtItem;
+        Loaded += HighlightItem;
     }
 
-    private void PointAtItem(object sender, RoutedEventArgs e)
+    private void HighlightItem(object sender, RoutedEventArgs e)
     {
-        System.Windows.Point location = item.HasScreenPosition
+        const double margin = 3;
+        const double fallbackWidth = 96;
+        const double fallbackHeight = 72;
+
+        System.Windows.Point topLeft = item.HasScreenPosition
             ? PointFromScreen(new System.Windows.Point(item.ScreenX, item.ScreenY))
             : new System.Windows.Point(item.ViewX, item.ViewY);
 
-        Canvas.SetLeft(Pointer, location.X - Pointer.ActualWidth / 2);
-        Canvas.SetTop(Pointer, location.Y - Pointer.ActualHeight);
+        System.Windows.Point bottomRight = item.HasScreenBounds
+            ? PointFromScreen(new System.Windows.Point(
+                item.ScreenX + item.ScreenWidth,
+                item.ScreenY + item.ScreenHeight))
+            : new System.Windows.Point(
+                topLeft.X + fallbackWidth,
+                topLeft.Y + fallbackHeight);
+
+        Canvas.SetLeft(Highlight, topLeft.X - margin);
+        Canvas.SetTop(Highlight, topLeft.Y - margin);
+        Highlight.Width = bottomRight.X - topLeft.X + margin * 2;
+        Highlight.Height = bottomRight.Y - topLeft.Y + margin * 2;
     }
 }

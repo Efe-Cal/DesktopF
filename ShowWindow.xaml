@@ -8,8 +8,10 @@
         ShowInTaskbar="False"
         Topmost="True">
     <Canvas x:Name="Overlay" Background="Transparent">
-        <Polygon x:Name="Pointer"
-                 Points="0,0 32,0 16,24"
-                 Fill="Red" />
+        <Rectangle x:Name="Highlight"
+                   Stroke="Red"
+                   StrokeThickness="4"
+                   RadiusX="4"
+                   RadiusY="4" />
     </Canvas>
 </Window>

@@ -11,7 +11,10 @@ public sealed record DesktopItem(
     int ViewY,
     int ScreenX,
     int ScreenY,
-    bool HasScreenPosition);
+    bool HasScreenPosition,
+    int ScreenWidth,
+    int ScreenHeight,
+    bool HasScreenBounds);
 
 public static class DesktopReader
 {
@@ -116,6 +119,16 @@ public static class DesktopReader
                         viewWindow,
                         ref screenPoint);
 
+                    bool hasBounds = NativeMethods.TryGetListViewItemBounds(
+                        viewWindow,
+                        index,
+                        out NativeRect itemBounds);
+                    if (hasBounds)
+                    {
+                        screenPoint.X = itemBounds.Left;
+                        screenPoint.Y = itemBounds.Top;
+                    }
+
                     results.Add(new DesktopItem(
                         Name: name,
                         Path: path,
@@ -124,7 +137,10 @@ public static class DesktopReader
                         ViewY: viewPoint.Y,
                         ScreenX: screenPoint.X,
                         ScreenY: screenPoint.Y,
-                        HasScreenPosition: converted));
+                        HasScreenPosition: converted || hasBounds,
+                        ScreenWidth: itemBounds.Right - itemBounds.Left,
+                        ScreenHeight: itemBounds.Bottom - itemBounds.Top,
+                        HasScreenBounds: hasBounds));
                 }
                 finally
                 {
@@ -175,8 +191,102 @@ public static class DesktopReader
 
 internal static class NativeMethods
 {
+    private const uint LvmGetItemRect = 0x100E;
+    private const uint ProcessVmAccess = 0x0038;
+    private const uint MemCommitReserve = 0x3000;
+    private const uint MemRelease = 0x8000;
+    private const uint PageReadWrite = 0x04;
+
     // DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2
     private static readonly IntPtr PerMonitorAwareV2 = new(-4);
+
+    internal static bool TryGetListViewItemBounds(
+        IntPtr viewWindow,
+        int itemIndex,
+        out NativeRect bounds)
+    {
+        bounds = default;
+        IntPtr listView = FindWindowEx(
+            viewWindow,
+            IntPtr.Zero,
+            "SysListView32",
+            null);
+
+        if (listView == IntPtr.Zero)
+        {
+            listView = viewWindow;
+        }
+
+        _ = GetWindowThreadProcessId(listView, out uint processId);
+        IntPtr process = OpenProcess(ProcessVmAccess, false, processId);
+        if (process == IntPtr.Zero)
+        {
+            return false;
+        }
+
+        nuint size = (nuint)Marshal.SizeOf<NativeRect>();
+        IntPtr remoteRect = VirtualAllocEx(
+            process,
+            IntPtr.Zero,
+            size,
+            MemCommitReserve,
+            PageReadWrite);
+
+        try
+        {
+            NativeRect requestedBounds = default;
+            if (remoteRect == IntPtr.Zero ||
+                !WriteProcessMemory(
+                    process,
+                    remoteRect,
+                    ref requestedBounds,
+                    size,
+                    out _) ||
+                SendMessage(
+                    listView,
+                    LvmGetItemRect,
+                    (IntPtr)itemIndex,
+                    remoteRect) == IntPtr.Zero ||
+                !ReadProcessMemory(
+                    process,
+                    remoteRect,
+                    out bounds,
+                    size,
+                    out _))
+            {
+                bounds = default;
+                return false;
+            }
+
+            Point topLeft = new() { X = bounds.Left, Y = bounds.Top };
+            Point bottomRight = new() { X = bounds.Right, Y = bounds.Bottom };
+            if (!ClientToScreen(listView, ref topLeft) ||
+                !ClientToScreen(listView, ref bottomRight))
+            {
+                bounds = default;
+                return false;
+            }
+
+            bounds = new NativeRect
+            {
+                Left = topLeft.X,
+                Top = topLeft.Y,
+                Right = bottomRight.X,
+                Bottom = bottomRight.Y
+            };
+
+            return bounds.Right > bounds.Left && bounds.Bottom > bounds.Top;
+        }
+        finally
+        {
+            if (remoteRect != IntPtr.Zero)
+            {
+                _ = VirtualFreeEx(process, remoteRect, 0, MemRelease);
+            }
+
+            _ = CloseHandle(process);
+        }
+    }
 
     [DllImport("user32.dll")]
     [return: MarshalAs(UnmanagedType.Bool)]
@@ -188,6 +298,69 @@ internal static class NativeMethods
     internal static extern bool ClientToScreen(
         IntPtr windowHandle,
         ref Point point);
+
+    [DllImport("user32.dll", CharSet = CharSet.Unicode)]
+    private static extern IntPtr FindWindowEx(
+        IntPtr parentWindow,
+        IntPtr childAfter,
+        string? className,
+        string? windowName);
+
+    [DllImport("user32.dll")]
+    private static extern uint GetWindowThreadProcessId(
+        IntPtr windowHandle,
+        out uint processId);
+
+    [DllImport("user32.dll")]
+    private static extern IntPtr SendMessage(
+        IntPtr windowHandle,
+        uint message,
+        IntPtr wParam,
+        IntPtr lParam);
+
+    [DllImport("kernel32.dll", SetLastError = true)]
+    private static extern IntPtr OpenProcess(
+        uint desiredAccess,
+        bool inheritHandle,
+        uint processId);
+
+    [DllImport("kernel32.dll", SetLastError = true)]
+    private static extern IntPtr VirtualAllocEx(
+        IntPtr process,
+        IntPtr address,
+        nuint size,
+        uint allocationType,
+        uint protection);
+
+    [DllImport("kernel32.dll", SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool VirtualFreeEx(
+        IntPtr process,
+        IntPtr address,
+        nuint size,
+        uint freeType);
+
+    [DllImport("kernel32.dll", SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool WriteProcessMemory(
+        IntPtr process,
+        IntPtr address,
+        ref NativeRect buffer,
+        nuint size,
+        out nuint bytesWritten);
+
+    [DllImport("kernel32.dll", SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool ReadProcessMemory(
+        IntPtr process,
+        IntPtr address,
+        out NativeRect buffer,
+        nuint size,
+        out nuint bytesRead);
+
+    [DllImport("kernel32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool CloseHandle(IntPtr handle);
 
     internal static void TryEnablePerMonitorDpiAwareness()
     {
@@ -209,6 +382,15 @@ internal struct Point
 {
     public int X;
     public int Y;
+}
+
+[StructLayout(LayoutKind.Sequential)]
+internal struct NativeRect
+{
+    public int Left;
+    public int Top;
+    public int Right;
+    public int Bottom;
 }
 
 internal enum Sigdn : int
