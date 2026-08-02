@@ -9,6 +9,7 @@ namespace DesktopF;
 public partial class App : Application
 {
     private SearchWindow? searchWindow;
+    private IntPtr previousForegroundWindow;
 
     protected override void OnStartup(StartupEventArgs e)
     {
@@ -29,6 +30,7 @@ public partial class App : Application
                 return;
 
             IntPtr foregroundWindow = GetForegroundWindow();
+            previousForegroundWindow = foregroundWindow;
             uint foregroundThread = GetWindowThreadProcessId(
                 foregroundWindow,
                 IntPtr.Zero
@@ -39,6 +41,10 @@ public partial class App : Application
 
             try
             {
+                Rect workArea = SystemParameters.WorkArea;
+                searchWindow.Left = workArea.Left + (workArea.Width - searchWindow.Width) / 2;
+                searchWindow.Top = workArea.Top + (workArea.Height - searchWindow.Height) / 3;
+
                 if (!searchWindow.IsVisible)
                     searchWindow.Show();
 
@@ -69,12 +75,17 @@ public partial class App : Application
             {
                 foreach (ShowWindow window in showWindows)
                     window.Close();
-
+            }
+            else if (searchWindow?.IsVisible == true)
+            {
+                searchWindow.Hide();
+            }
+            else
+            {
                 return;
             }
 
-            if (searchWindow?.IsVisible == true)
-                searchWindow.Hide();
+            SetForegroundWindow(previousForegroundWindow);
         });
     }
 

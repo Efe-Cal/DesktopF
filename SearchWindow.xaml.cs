@@ -23,6 +23,7 @@ public partial class SearchWindow : Window
 
         e.Handled = true;
         string inputText = Input.Text.Trim();
+        Input.Clear();
         if (string.IsNullOrEmpty(inputText))
         {
             return;
@@ -42,6 +43,6 @@ public partial class SearchWindow : Window
             new ShowWindow(match).Show();
         }
 
-        Close();
+        Hide();
     }
 }

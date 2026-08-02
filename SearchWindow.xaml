@@ -1,11 +1,12 @@
 <Window x:Class="DesktopF.SearchWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="DesktopF" Width="420" Height="120">
+        Title="DesktopF" Width="450" Height="120" WindowStyle="None" WindowStartupLocation="Manual">
     <Grid Margin="16">
         <TextBox x:Name="Input"
                  VerticalContentAlignment="Center"
                  KeyDown="Input_KeyDown"
-                 ToolTip="Type something and press Enter" />
+                 ToolTip="Type something and press Enter"
+                 FontSize="24" />
     </Grid>
 </Window>
