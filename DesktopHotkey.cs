@@ -12,13 +12,15 @@ public static class DesktopHotkey
     private const int WM_KEYDOWN = 0x0100;
 
     private const int VK_CONTROL = 0x11;
+    private const int VK_ESCAPE = 0x1B;
     private const int VK_F = 0x46;
 
     private static IntPtr _hookHandle = IntPtr.Zero;
 
     private static readonly LowLevelKeyboardProc HookProcedure = HookCallback;
 
-    public static event Action? Pressed;
+    public static event Action? PressedCtrlF;
+    public static event Action? PressedEsc;
 
     public static void Start()
     {
@@ -65,6 +67,9 @@ public static class DesktopHotkey
         {
             int virtualKey = Marshal.ReadInt32(lParam);
 
+            if (virtualKey == VK_ESCAPE)
+                PressedEsc?.Invoke();
+
             bool controlPressed =
                 (GetAsyncKeyState(VK_CONTROL) & 0x8000) != 0;
 
@@ -74,7 +79,7 @@ public static class DesktopHotkey
                 IsDesktopForeground()
             )
             {
-                Pressed?.Invoke();
+                PressedCtrlF?.Invoke();
 
                 // Prevent Windows Explorer from processing Ctrl+F.
                 return new IntPtr(1);

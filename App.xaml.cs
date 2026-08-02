@@ -16,7 +16,8 @@ public partial class App : Application
 
         searchWindow = new SearchWindow();
 
-        DesktopHotkey.Pressed += OnDesktopCtrlF;
+        DesktopHotkey.PressedCtrlF += OnDesktopCtrlF;
+        DesktopHotkey.PressedEsc += OnDesktopEsc;
         DesktopHotkey.Start();
     }
 
@@ -56,6 +57,27 @@ public partial class App : Application
         });
     }
 
+    private void OnDesktopEsc()
+    {
+        Dispatcher.Invoke(() =>
+        {
+            ShowWindow[] showWindows = Windows
+                .OfType<ShowWindow>()
+                .ToArray();
+            
+            if (showWindows.Length > 0)
+            {
+                foreach (ShowWindow window in showWindows)
+                    window.Close();
+
+                return;
+            }
+
+            if (searchWindow?.IsVisible == true)
+                searchWindow.Hide();
+        });
+    }
+
     [DllImport("user32.dll")]
     private static extern IntPtr GetForegroundWindow();
 
@@ -80,7 +102,8 @@ public partial class App : Application
 
     protected override void OnExit(ExitEventArgs e)
     {
-        DesktopHotkey.Pressed -= OnDesktopCtrlF;
+        DesktopHotkey.PressedCtrlF -= OnDesktopCtrlF;
+        DesktopHotkey.PressedEsc -= OnDesktopEsc;
         DesktopHotkey.Stop();
 
         base.OnExit(e);
