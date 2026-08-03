@@ -98,13 +98,19 @@ public static class DesktopHotkey
     {
         IntPtr foregroundWindow = GetForegroundWindow();
         Console.WriteLine($"Foreground window handle: {foregroundWindow}");
-        if (foregroundWindow == IntPtr.Zero)
+
+        return IsDesktopWindow(foregroundWindow);
+    }
+
+    internal static bool IsDesktopWindow(IntPtr windowHandle)
+    {
+        if (windowHandle == IntPtr.Zero)
             return false;
 
         var className = new StringBuilder(256);
 
         GetClassName(
-            foregroundWindow,
+            windowHandle,
             className,
             className.Capacity
         );

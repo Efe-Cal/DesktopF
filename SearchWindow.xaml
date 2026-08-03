@@ -1,12 +1,22 @@
 <Window x:Class="DesktopF.SearchWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="DesktopF" Width="450" Height="120" WindowStyle="None" WindowStartupLocation="Manual">
+        Title="DesktopF" Height="150" WindowStyle="None" WindowStartupLocation="Manual">
     <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
         <TextBox x:Name="Input"
                  VerticalContentAlignment="Center"
                  KeyDown="Input_KeyDown"
                  ToolTip="Type something and press Enter"
                  FontSize="24" />
+        <StackPanel Grid.Row="1" Margin="0,10,0,0" Orientation="Horizontal">
+            <RadioButton x:Name="StartsWithOption" Content="Starts with" IsChecked="True" GroupName="MatchMode" />
+            <RadioButton Content="Contains" Margin="12,0,0,0" GroupName="MatchMode" />
+            <CheckBox x:Name="CaseSensitiveOption" Content="Case sensitive" Margin="20,0,0,0" />
+            <CheckBox x:Name="RegexOption" Content="Regex" Margin="12,0,0,0" />
+        </StackPanel>
     </Grid>
 </Window>
