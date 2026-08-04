@@ -1,6 +1,8 @@
+using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Input;
-using System.Text.RegularExpressions;
+using System.Windows.Interop;
 
 namespace DesktopF;
 
@@ -15,8 +17,19 @@ public partial class SearchWindow : Window
                     SystemParameters.PrimaryScreenWidth * 0.4,
                     MinWidth,
                     MaxWidth);
+        SourceInitialized += EnableNativeBackdrop;
         Input.Focus();
         items = DesktopReader.GetItems();
+    }
+
+    private void EnableNativeBackdrop(object? sender, EventArgs e)
+    {
+        IntPtr handle = new WindowInteropHelper(this).Handle;
+        int roundedCorners = 2;
+        int acrylicBackdrop = 3;
+
+        _ = DwmSetWindowAttribute(handle, 33, ref roundedCorners, sizeof(int));
+        _ = DwmSetWindowAttribute(handle, 38, ref acrylicBackdrop, sizeof(int));
     }
 
     private void Input_KeyDown(object sender, KeyEventArgs e)
@@ -76,13 +89,17 @@ public partial class SearchWindow : Window
         Hide();
     }
 
-    private void Options_Expanded(object sender, RoutedEventArgs e)
+    private void SettingsButton_Click(object sender, RoutedEventArgs e)
     {
-        Height = 135;
+        OptionsPanel.Visibility = OptionsPanel.Visibility == Visibility.Visible
+            ? Visibility.Collapsed
+            : Visibility.Visible;
     }
 
-    private void Options_Collapsed(object sender, RoutedEventArgs e)
-    {
-        Height = 112;
-    }
+    [DllImport("dwmapi.dll")]
+    private static extern int DwmSetWindowAttribute(
+        IntPtr window,
+        int attribute,
+        ref int value,
+        int valueSize);
 }

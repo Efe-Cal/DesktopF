@@ -98,15 +98,16 @@ public partial class App : Application
 
             try
             {
-                Rect workArea = SystemParameters.WorkArea;
-                searchWindow.Left = workArea.Left + (workArea.Width - searchWindow.Width) / 2;
-                searchWindow.Top = workArea.Top + (workArea.Height - searchWindow.Height) / 3;
-
                 if (!searchWindow.IsVisible)
                     searchWindow.Show();
 
                 if (searchWindow.WindowState == WindowState.Minimized)
                     searchWindow.WindowState = WindowState.Normal;
+
+                searchWindow.UpdateLayout();
+                Rect workArea = SystemParameters.WorkArea;
+                searchWindow.Left = workArea.Left + (workArea.Width - searchWindow.ActualWidth) / 2;
+                searchWindow.Top = workArea.Top + (workArea.Height - searchWindow.ActualHeight) / 3;
 
                 SetForegroundWindow(new WindowInteropHelper(searchWindow).Handle);
                 searchWindow.Activate();

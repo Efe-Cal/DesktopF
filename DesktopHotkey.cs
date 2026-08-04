@@ -97,7 +97,6 @@ public static class DesktopHotkey
     private static bool IsDesktopForeground()
     {
         IntPtr foregroundWindow = GetForegroundWindow();
-        Console.WriteLine($"Foreground window handle: {foregroundWindow}");
 
         return IsDesktopWindow(foregroundWindow);
     }
@@ -116,8 +115,6 @@ public static class DesktopHotkey
         );
 
         string windowClass = className.ToString();
-        Console.WriteLine($"Foreground window class: {windowClass}");
-        Console.WriteLine($"Is desktop foreground: {windowClass is "Progman" or "WorkerW"}");
         return windowClass is "Progman" or "WorkerW";
     }
 
