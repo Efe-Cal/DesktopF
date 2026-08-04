@@ -11,7 +11,10 @@ public partial class SearchWindow : Window
     public SearchWindow()
     {
         InitializeComponent();
-        Width = SystemParameters.PrimaryScreenWidth * 0.4;
+        Width = Math.Clamp(
+                    SystemParameters.PrimaryScreenWidth * 0.4,
+                    MinWidth,
+                    MaxWidth);
         Input.Focus();
         items = DesktopReader.GetItems();
     }
@@ -71,5 +74,15 @@ public partial class SearchWindow : Window
         }
 
         Hide();
+    }
+
+    private void Options_Expanded(object sender, RoutedEventArgs e)
+    {
+        Height = 135;
+    }
+
+    private void Options_Collapsed(object sender, RoutedEventArgs e)
+    {
+        Height = 112;
     }
 }
