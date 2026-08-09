@@ -30,9 +30,14 @@ dotnet run
 ```
 
 ### Build to Executable
-Run the following command to build a single-file executable for Windows x64. The output will be in the `publish-single` folder.
+Run the following command to build a compressed, self-contained executable for Windows x64. The output will be `publish-single/DesktopF.exe`.
 ```powershell
-
-dotnet publish DesktopF.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:DebugType=None -p:DebugSymbols=false -o publish-single
+dotnet publish .\DesktopF.csproj -c Release -r win-x64 --self-contained true `
+  -p:PublishSingleFile=true `
+  -p:EnableCompressionInSingleFile=true `
+  -p:IncludeNativeLibrariesForSelfExtract=true `
+  -p:DebugType=None `
+  -p:DebugSymbols=false `
+  -o .\publish-single
 ```
 
