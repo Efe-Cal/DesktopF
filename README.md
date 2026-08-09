@@ -1,5 +1,5 @@
 # DesktopF
-A lightweight Windows desktop search tool. Press Ctrl+F while the desktop is focused, search for an icon, then press Enter to highlight its location.
+A lightweight Windows desktop search tool. Press Ctrl+F while the desktop is focused, search for an item, then press Enter to highlight its location.
 
 ![Screenshot](https://cdn.hackclub.com/019fe732-a57b-78e6-b085-96af94ca1278/Ekran%20g%C3%B6r%C3%BCnt%C3%BCs%C3%BC%202026-08-09%20182546.png)
 
