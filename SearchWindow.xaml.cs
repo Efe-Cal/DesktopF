@@ -8,7 +8,7 @@ namespace DesktopF;
 
 public partial class SearchWindow : Window
 {
-    private readonly IReadOnlyList<DesktopItem> items;
+    private readonly IReadOnlyList<DesktopItem> items = [];
 
     public SearchWindow()
     {
@@ -32,18 +32,76 @@ public partial class SearchWindow : Window
         _ = DwmSetWindowAttribute(handle, 38, ref acrylicBackdrop, sizeof(int));
     }
 
-    private void Input_KeyDown(object sender, KeyEventArgs e)
+    private void SearchWindow_PreviewKeyDown(object sender, KeyEventArgs e)
     {
+        if (e.Key is Key.Down or Key.Up)
+        {
+            if (ResultsList.Items.Count == 0)
+            {
+                return;
+            }
+
+            int selectedIndex = e.Key == Key.Down
+                ? Math.Min(ResultsList.SelectedIndex + 1, ResultsList.Items.Count - 1)
+                : Math.Max(ResultsList.SelectedIndex - 1, -1);
+
+            ResultsList.SelectedIndex = selectedIndex;
+            if (ResultsList.SelectedItem is not null)
+            {
+                ResultsList.ScrollIntoView(ResultsList.SelectedItem);
+            }
+
+            e.Handled = true;
+            return;
+        }
+
         if (e.Key != Key.Enter)
         {
             return;
         }
 
         e.Handled = true;
-        string inputText = Input.Text.Trim();
+        DesktopItem[] selectedItems = ResultsList.SelectedItem is DesktopItem selectedItem
+            ? [selectedItem]
+            : ResultsList.Items.Cast<DesktopItem>().ToArray();
+
+        if (selectedItems.Length == 0)
+        {
+            return;
+        }
+
+        foreach (ShowWindow window in Application.Current.Windows
+                     .OfType<ShowWindow>()
+                     .ToArray())
+        {
+            window.Close();
+        }
+
         Input.Clear();
+        foreach (DesktopItem item in selectedItems)
+        {
+            new ShowWindow(item).Show();
+        }
+
+        Hide();
+    }
+
+    private void Input_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
+    {
+        UpdateMatches();
+    }
+
+    private void SearchOptions_Changed(object sender, RoutedEventArgs e)
+    {
+        UpdateMatches();
+    }
+
+    private void UpdateMatches()
+    {
+        string inputText = Input.Text.Trim();
         if (string.IsNullOrEmpty(inputText))
         {
+            ShowMatches([]);
             return;
         }
 
@@ -51,7 +109,7 @@ public partial class SearchWindow : Window
             ? StringComparison.Ordinal
             : StringComparison.OrdinalIgnoreCase;
 
-        IEnumerable<DesktopItem> matches;
+        IReadOnlyList<DesktopItem> matches;
         if (RegexOption.IsChecked == true)
         {
             try
@@ -64,7 +122,7 @@ public partial class SearchWindow : Window
             }
             catch (ArgumentException)
             {
-                MessageBox.Show("Invalid regular expression.", "DesktopF");
+                ShowMatches([]);
                 return;
             }
         }
@@ -72,21 +130,20 @@ public partial class SearchWindow : Window
         {
             matches = items.Where(item => StartsWithOption.IsChecked == true
                 ? item.Name.StartsWith(inputText, comparison)
-                : item.Name.Contains(inputText, comparison));
+                : item.Name.Contains(inputText, comparison)).ToList();
         }
 
-        if (!matches.Any())
-        {
-            MessageBox.Show("No matching desktop items.", "DesktopF");
-            return;
-        }
+        ShowMatches(matches);
+    }
 
-        foreach (DesktopItem match in matches)
-        {
-            new ShowWindow(match).Show();
-        }
+    private void ShowMatches(IReadOnlyList<DesktopItem> matches)
+    {
+        ResultsList.ItemsSource = matches;
+        ResultsPanel.Visibility = matches.Count == 0
+            ? Visibility.Collapsed
+            : Visibility.Visible;
 
-        Hide();
+        ResultsList.SelectedIndex = -1;
     }
 
     private void SettingsButton_Click(object sender, RoutedEventArgs e)

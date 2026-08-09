@@ -10,6 +10,7 @@
         ShowInTaskbar="False"
         Background="Transparent"
         FontFamily="Segoe UI Variable Text, Segoe UI"
+        PreviewKeyDown="SearchWindow_PreviewKeyDown"
         WindowStyle="None" WindowStartupLocation="Manual">
     <shell:WindowChrome.WindowChrome>
         <shell:WindowChrome CaptionHeight="0"
@@ -23,6 +24,7 @@
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="70" />
+                <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
@@ -47,8 +49,8 @@
                          Grid.Column="1"
                          Margin="9,0,12,0"
                          VerticalContentAlignment="Center"
-                         KeyDown="Input_KeyDown"
-                         ToolTip="Type a desktop item name and press Enter"
+                         TextChanged="Input_TextChanged"
+                         ToolTip="Type a desktop item name"
                          FontSize="28"
                          Background="Transparent"
                          BorderThickness="0"
@@ -88,8 +90,41 @@
                 </Button>
             </Grid>
 
-            <StackPanel x:Name="OptionsPanel"
+            <Border x:Name="ResultsPanel"
                         Grid.Row="1"
+                        BorderBrush="#1F000000"
+                        BorderThickness="0,1,0,0"
+                        Visibility="Collapsed">
+                <ListBox x:Name="ResultsList"
+                         MaxHeight="264"
+                         SelectionMode="Single"
+                         BorderThickness="0"
+                         Background="Transparent"
+                         DisplayMemberPath="Name"
+                         ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                         ScrollViewer.VerticalScrollBarVisibility="Auto">
+                    <ListBox.ItemContainerStyle>
+                        <Style TargetType="ListBoxItem">
+                            <Setter Property="Height" Value="44" />
+                            <Setter Property="Padding" Value="55,0,16,0" />
+                            <Setter Property="VerticalContentAlignment" Value="Center" />
+                            <Setter Property="FontSize" Value="16" />
+                            <Setter Property="Foreground" Value="#D9000000" />
+                            <Setter Property="BorderThickness" Value="0" />
+                            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+                            <Style.Triggers>
+                                <Trigger Property="IsSelected" Value="True">
+                                    <Setter Property="Background" Value="#267AADE8" />
+                                    <Setter Property="Foreground" Value="#FF000000" />
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </ListBox.ItemContainerStyle>
+                </ListBox>
+            </Border>
+
+            <StackPanel x:Name="OptionsPanel"
+                        Grid.Row="2"
                         Visibility="Collapsed">
                 <Border Height="1" Background="#1F000000" />
 
@@ -99,18 +134,23 @@
                     <RadioButton x:Name="StartsWithOption"
                                  Content="Starts with"
                                  IsChecked="True"
+                                 Click="SearchOptions_Changed"
                                  GroupName="MatchMode" />
 
-                    <RadioButton Content="Contains"
+                    <RadioButton x:Name="ContainsOption"
+                                 Content="Contains"
                                  Margin="4,0,0,0"
+                                 Click="SearchOptions_Changed"
                                  GroupName="MatchMode" />
 
                     <CheckBox x:Name="CaseSensitiveOption"
                               Content="Case sensitive"
+                              Click="SearchOptions_Changed"
                               Margin="4,0,0,0" />
 
                     <CheckBox x:Name="RegexOption"
                               Content="Regex"
+                              Click="SearchOptions_Changed"
                               Margin="4,0,0,0" />
                 </StackPanel>
             </StackPanel>
