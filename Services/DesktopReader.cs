@@ -3,19 +3,6 @@ using System.Text;
 
 namespace DesktopF;
 
-public sealed record DesktopItem(
-    string Name,
-    string? Path,
-    string ParsingName,
-    int ViewX,
-    int ViewY,
-    int ScreenX,
-    int ScreenY,
-    bool HasScreenPosition,
-    int ScreenWidth,
-    int ScreenHeight,
-    bool HasScreenBounds);
-
 public static class DesktopReader
 {
     private const int SwcDesktop = 8;
